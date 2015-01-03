@@ -19,7 +19,7 @@ object Demo extends App {
   def runDemo() = {
     for (i <- 1 to 10) action(i * 10) withTimeSampleAs SeriesName
 
-    summary(measurementsSink.aggr)
+    summary()
   }
 
   def action(sleep: Long) = Thread sleep sleep
@@ -36,12 +36,28 @@ object Demo extends App {
     println(color + s"Got sample '${s.series}' with time value of ${s.time}" + Console.RESET)
   }
 
-  def summary(aggr: Measurement) = {
+  def summary() = {
+
     println()
-    val title = s"Summary of '${aggr.series}':"
+    infoTitle("Top 3 Measurements:")
+    info(measurementsSink.top(3).map(m => m.averageDuration.toString).mkString("\r\n"))
+
+    println()
+    val aggr = measurementsSink.aggr
+    infoTitle(s"Summary of '${aggr.series}':")
+    info(
+      s"""
+         |Average execution time: ${aggr.averageDuration}.
+         |Minimum execution time: ${aggr.minDuration}.
+         |Maximum execution time: ${aggr.maxDuration}.
+         |Number of executions: ${aggr.count}.
+       """.stripMargin
+    )
+  }
+
+  def infoTitle(title: String) = {
     info(title)
     info("".padTo(title.length, "-").mkString)
-    info(s"Average execution time: ${aggr.averageDuration}.\r\nMaximum execution time: ${aggr.maxDuration}.\r\nNumber of executions: ${aggr.count}.")
   }
 
   def info(msg: String) = println(Console.WHITE + Console.BOLD + msg + Console.RESET)

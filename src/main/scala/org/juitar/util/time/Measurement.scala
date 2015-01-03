@@ -5,10 +5,13 @@ import java.util.concurrent.TimeUnit
 import scala.concurrent.duration
 import scala.concurrent.duration.Duration
 
-case class Measurement(series: String, avg: Double, max: Long, count: Long) {
+case class Measurement(series: String, avg: Double, min: Long, max: Long, count: Long) {
 
   def maxDuration: Duration = Duration(max, TimeUnit.MILLISECONDS)
   def maxTime(u: duration.TimeUnit = TimeUnit.MILLISECONDS): Double = Duration(max, TimeUnit.MILLISECONDS).toUnit(u)
+
+  def minDuration: Duration = Duration(min, TimeUnit.MILLISECONDS)
+  def minTime(u: duration.TimeUnit = TimeUnit.MILLISECONDS): Double = Duration(min, TimeUnit.MILLISECONDS).toUnit(u)
 
   def averageDuration: Duration = Duration(average, TimeUnit.MILLISECONDS)
   def average: Double = avg
@@ -19,6 +22,7 @@ case class Measurement(series: String, avg: Double, max: Long, count: Long) {
     Measurement(
     m.series,
     combinedAvg(m),
+    math.min(m.min, min),
     math.max(m.max, max),
     count + m.count
     )
@@ -33,9 +37,9 @@ case class Measurement(series: String, avg: Double, max: Long, count: Long) {
 }
 
 object Measurement {
-  def apply(series: String, time: Duration): Measurement = Measurement(series, time.toMillis, time.toMillis, 1)
-  def apply(series: String, time: Long): Measurement = Measurement(series, time, time, 1)
-  def apply(sample: TimeSample): Measurement = Measurement(sample.series, sample.time, sample.time, 1)
-  def apply(series: String): Measurement = Measurement(series, 0, 0, 0)
+  def apply(series: String, time: Duration): Measurement = Measurement(series, time.toMillis, time.toMillis, time.toMillis, 1)
+  def apply(series: String, time: Long): Measurement = Measurement(series, time, time, time, 1)
+  def apply(sample: TimeSample): Measurement = Measurement(sample.series, sample.time, sample.time, sample.time, 1)
+  def apply(series: String): Measurement = Measurement(series, 0, Long.MaxValue, 0, 0)
 }
 
