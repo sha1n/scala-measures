@@ -1,5 +1,5 @@
-scala-measures
-==============
+scala-time
+==========
 Small experiment with execution time measurement design in Scala.
 
 If it interests you, you may take a look at the demo app for usage example. 
