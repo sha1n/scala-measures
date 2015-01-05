@@ -1,32 +1,23 @@
 package org.juitar.util.time
 
 import java.util.Comparator
-import java.util.concurrent.{TimeUnit, PriorityBlockingQueue, ThreadFactory, Executors}
+import java.util.concurrent.{PriorityBlockingQueue, TimeUnit}
 
 import org.juitar.util.time.TimeSampler._
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration.Duration
 
-class AsyncReporter(report: ReportSample, queueCapacity: Int, reporters: Int) {
+class AsyncReporter(report: ReportSample, queueCapacity: Int, reporters: Int)(implicit ec: ExecutionContext) {
 
-  def this(report: ReportSample) = this(report, 100, Runtime.getRuntime.availableProcessors())
+  def this(report: ReportSample)(implicit ec: ExecutionContext) = this(report, 100, 1)(ec)
 
-  private[this] val executor = Executors.newFixedThreadPool(reporters, new ThreadFactory {
-    override def newThread(r: Runnable): Thread = {
-      val t = Executors.defaultThreadFactory().newThread(r)
-      t.setDaemon(true)
-      t
-    }
-  })
-
-  private[this] implicit val executionContext = ExecutionContext.fromExecutor(executor)
+  @volatile private[this] var halt = false
   private[this] val queue = new PriorityBlockingQueue[TimeSample](queueCapacity, TimeSampleOrderComparator)
 
   for (i <- 1 to reporters) {
-    executionContext.execute(new Runnable {
+    ec.execute(new Runnable {
       override def run(): Unit = {
-        while (!executor.isShutdown) {
+        while (!halt) {
           val ts = queue.poll(10, TimeUnit.MILLISECONDS)
           if (ts != null)
             report.apply(ts)
@@ -36,16 +27,22 @@ class AsyncReporter(report: ReportSample, queueCapacity: Int, reporters: Int) {
   }
 
   def report(timeSample: TimeSample): Unit = {
-    if (executor.isShutdown) throw new IllegalStateException("This reporter has been shutdown.")
+    if (halt) throw new IllegalStateException("This reporter has been shutdown.")
 
     queue.add(timeSample)
   }
 
-  def shutdown(timeout: Duration) = {
-    executor.shutdown()
-    executor.awaitTermination(timeout.toMillis, TimeUnit.MILLISECONDS)
+  def shutdown() = {
+    halt = true
     queue.clear()
   }
+}
+object AsyncReporter {
+  def apply(report: ReportSample, queueCapacity: Int, reporters: Int)(implicit ec: ExecutionContext): ReportSample =
+    new AsyncReporter(report, queueCapacity, reporters).report
+
+  def apply(report: ReportSample)(implicit ec: ExecutionContext): ReportSample =
+    new AsyncReporter(report).report
 }
 
 object TimeSampleOrderComparator extends Comparator[TimeSample] {

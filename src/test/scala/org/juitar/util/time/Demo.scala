@@ -1,17 +1,28 @@
 package org.juitar.util.time
 
+import java.util.concurrent.{Executors, ThreadFactory}
+
 import org.juitar.util.time.TimeSampler._
-import scala.concurrent.duration._
+
+import scala.concurrent.ExecutionContext
 
 object Demo extends App {
 
   logo()
 
+  private[this] val executor = Executors.newFixedThreadPool(Runtime.getRuntime.availableProcessors(), new ThreadFactory {
+    override def newThread(r: Runnable): Thread = {
+      val t = Executors.defaultThreadFactory().newThread(r)
+      t.setDaemon(true)
+      t
+    }
+  })
+  private[this] implicit val executionContext = ExecutionContext.fromExecutor(executor)
+
   val SeriesName = "My Action Series"
   val measurementsSink = new MeasurementSink(SeriesName, 10)
 
-  val asyncReporter = new AsyncReporter(demoReporter)
-  implicit val reporter: ReportSample = asyncReporter.report
+  implicit val reporter: ReportSample = AsyncReporter(demoReporter)
 
 
   runDemo()
@@ -21,7 +32,8 @@ object Demo extends App {
   def runDemo() = {
     for (i <- 1 to 10) action(i * 10) withTimeSampleAs SeriesName
 
-    asyncReporter.shutdown(1.second)
+    Thread sleep 1000 // Allow the reporter queue to be consumed for the sake of this demo
+
     summary()
   }
 
