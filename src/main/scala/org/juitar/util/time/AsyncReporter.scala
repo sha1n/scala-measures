@@ -26,7 +26,7 @@ class AsyncReporter(report: ReportSample, queueCapacity: Int, reporters: Int) {
   for (i <- 1 to reporters) {
     executionContext.execute(new Runnable {
       override def run(): Unit = {
-        while (!Thread.interrupted()) {
+        while (!executor.isShutdown) {
           val ts = queue.poll(10, TimeUnit.MILLISECONDS)
           if (ts != null)
             report.apply(ts)
