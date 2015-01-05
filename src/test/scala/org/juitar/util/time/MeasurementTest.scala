@@ -14,7 +14,7 @@ class MeasurementTest extends SpecificationWithJUnit with NoTimeConversions {
      }
 
      "handle zero measurements" in {
-       (Measurement("name", 0, 0, 0, 0) & Measurement("name", 10.0, 10, 10, 1)) === Measurement("name", 10.0, 0, 10, 1)
+       (Measurement("name", 0, 0, 0, 0) & Measurement("name", 10.0, 10, 10, 1)) === Measurement("name", 10.0, 10, 10, 1)
      }
    }
 

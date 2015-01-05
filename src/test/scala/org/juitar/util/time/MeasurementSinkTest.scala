@@ -7,7 +7,7 @@ class MeasurementSinkTest extends SpecificationWithJUnit {
 
   "add" should {
     "update aggregate" in new Context {
-      sink.aggr === Measurement(MeasName, 0, Long.MaxValue, 0, 0)
+      sink.aggr === Measurement(MeasName, 0, 0, 0, 0)
       sink ++ Measurement(MeasName, 1)
       sink.aggr === Measurement(MeasName, 1, 1, 1, 1)
     }

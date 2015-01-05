@@ -20,11 +20,11 @@ case class Measurement(series: String, avg: Double, min: Long, max: Long, count:
     require(series == m.series, "Cannot accumulate measurements with different names")
 
     Measurement(
-    m.series,
-    combinedAvg(m),
-    math.min(m.min, min),
-    math.max(m.max, max),
-    count + m.count
+      m.series,
+      combinedAvg(m),
+      if (count == 0) m.min else if (m.count == 0) min else math.min(m.min, min),
+      math.max(m.max, max),
+      count + m.count
     )
   }
 
@@ -40,6 +40,6 @@ object Measurement {
   def apply(series: String, time: Duration): Measurement = Measurement(series, time.toMillis, time.toMillis, time.toMillis, 1)
   def apply(series: String, time: Long): Measurement = Measurement(series, time, time, time, 1)
   def apply(sample: TimeSample): Measurement = Measurement(sample.series, sample.time, sample.time, sample.time, 1)
-  def apply(series: String): Measurement = Measurement(series, 0, Long.MaxValue, 0, 0)
+  def apply(series: String): Measurement = Measurement(series, 0, 0, 0, 0)
 }
 

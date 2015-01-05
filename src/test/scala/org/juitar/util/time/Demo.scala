@@ -1,6 +1,7 @@
 package org.juitar.util.time
 
 import org.juitar.util.time.TimeSampler._
+import scala.concurrent.duration._
 
 object Demo extends App {
 
@@ -9,7 +10,8 @@ object Demo extends App {
   val SeriesName = "My Action Series"
   val measurementsSink = new MeasurementSink(SeriesName, 10)
 
-  implicit val reporter: ReportSample = demoReporter
+  val asyncReporter = new AsyncReporter(demoReporter)
+  implicit val reporter: ReportSample = asyncReporter.report
 
 
   runDemo()
@@ -19,6 +21,7 @@ object Demo extends App {
   def runDemo() = {
     for (i <- 1 to 10) action(i * 10) withTimeSampleAs SeriesName
 
+    asyncReporter.shutdown(1.second)
     summary()
   }
 
