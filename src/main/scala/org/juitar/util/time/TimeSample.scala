@@ -13,7 +13,7 @@ case class TimeSample private (series: String, timeStamp: Long, time: Long) {
   def <= (other: TimeSample): Boolean = this.time <= other.time
   def == (other: TimeSample): Boolean = this.time == other.time
 
-  def duration = Duration(timeStamp, TimeUnit.MILLISECONDS)
+  def duration = Duration(time, TimeUnit.MILLISECONDS)
 }
 
 object TimeSample {

@@ -20,7 +20,7 @@ object Demo extends App {
   private[this] implicit val executionContext = ExecutionContext.fromExecutor(executor)
 
   val SeriesName = "My Action Series"
-  val measurementsSink = new MeasurementSink(SeriesName, 10)
+  val timeSampleSink = new TimeSampleSink(SeriesName, 10)
 
   implicit val reporter: ReportSample = AsyncReporter(demoReporter)
 
@@ -40,7 +40,7 @@ object Demo extends App {
   def action(sleep: Long) = Thread sleep sleep
 
   def demoReporter(s: TimeSample): Unit = {
-    measurementsSink ++ s
+    timeSampleSink ++ s
 
     val color = s match {
       case ts@TimeSample(_, _, t) if t < 30 => Console.GREEN + Console.BOLD
@@ -55,10 +55,10 @@ object Demo extends App {
 
     println()
     infoTitle("Top 3 Measurements:")
-    info(measurementsSink.top(3).map(m => m.averageDuration.toString).mkString("\r\n"))
+    info(timeSampleSink.top(3).map(m => m.duration).mkString("\r\n"))
 
     println()
-    val aggr = measurementsSink.aggr
+    val aggr = timeSampleSink.aggr
     infoTitle(s"Summary of '${aggr.series}':")
     info(
       s"""

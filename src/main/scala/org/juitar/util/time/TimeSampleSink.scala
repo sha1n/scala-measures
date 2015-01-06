@@ -1,8 +1,25 @@
 package org.juitar.util.time
 
-class TimeSampleSink(series: String, capacity: Int = 10) extends Sink[TimeSample](capacity) {
+import scala.util.{Success, Try}
 
+class TimeSampleSink(series: String, capacity: Int = 10) extends Sink[TimeSample](capacity, TimeSampleSink.validate(series)) {
+
+  implicit val timeOrder = SampleOrdering
+
+  @volatile private[this] var aggregate = Aggregation(series)
+
+  final override def add(item: TimeSample): Try[TimeSample] = {
+    super.add(item) match {
+      case s@Success(value) =>
+        aggregate = aggregate & Aggregation(value)
+        s
+      case f => f
+    }
+  }
+
+  def top(n: Int) = topN(n)
   def history = lastN
+  def aggr = aggregate
   def median: Double = {
     val freeze = lastN
     val sorted = freeze.map(s => s.time).sorted
@@ -13,3 +30,15 @@ class TimeSampleSink(series: String, capacity: Int = 10) extends Sink[TimeSample
   }
 
 }
+object TimeSampleSink {
+  def validate(series: String)(sample: TimeSample): TimeSample =
+    if (series != sample.series) throw new IncompatibleSeriesException(sample.series, series)
+    else sample
+}
+
+object SampleOrdering extends Ordering[TimeSample] {
+  override def compare(x: TimeSample, y: TimeSample): Int = -x.time.compareTo(y.time)
+}
+
+class IncompatibleSeriesException(reportedSeries: String, currentSeries: String)
+  extends RuntimeException(s"'$reportedSeries' cannot be added to series '$currentSeries'")

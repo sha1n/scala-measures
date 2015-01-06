@@ -4,18 +4,25 @@ import java.util
 import java.util.concurrent.ConcurrentLinkedDeque
 
 import scala.collection.JavaConversions._
+import scala.util.Try
 
-private [util] class Sink[T](capacity: Int) {
+private [util] class Sink[T](capacity: Int, validate: (T) => T) {
   
   private final val data: util.Deque[T] = new ConcurrentLinkedDeque[T]()
 
-  def add(item: T): Unit = {
-    data.addFirst(item)
+  def add(item: T): Try[T] = {
+    Try({
+      validate(item)
 
-    while (data.size() > capacity) data.removeLast()
+      data.addFirst(validate(item))
+
+      while (data.size() > capacity) data.removeLast()
+      item
+    })
+
   }
 
-  final def ++ (item: T): Unit = add(item)
+  final def ++ (item: T): Try[T] = add(item)
 
   final def lastN: Seq[T] = data.toSeq
 
