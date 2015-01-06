@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 import scala.concurrent.duration
 import scala.concurrent.duration.Duration
 
-case class Aggregation(series: String, avg: Double, min: Long, max: Long, count: Long) {
+case class AggregatedTimeSample(series: String, avg: Double, min: Long, max: Long, count: Long) {
 
   require(series != null, "series cannot be null")
   require(average >= 0, "time average must be non-negative")
@@ -23,10 +23,10 @@ case class Aggregation(series: String, avg: Double, min: Long, max: Long, count:
   def averageDuration: Duration = Duration(average, TimeUnit.MILLISECONDS)
   def average: Double = avg
 
-  def accumulate(m: Aggregation): Aggregation = {
-    require(series == m.series, "Cannot accumulate measurements with different names")
+  def accumulate(m: AggregatedTimeSample): AggregatedTimeSample = {
+    if (series != m.series) throw new IncompatibleSeriesException(m.series, series)
 
-    Aggregation(
+    AggregatedTimeSample(
       m.series,
       combinedAvg(m),
       if (count == 0) m.min else if (m.count == 0) min else math.min(m.min, min),
@@ -35,18 +35,18 @@ case class Aggregation(series: String, avg: Double, min: Long, max: Long, count:
     )
   }
 
-  def & (m: Aggregation) = accumulate(m)
+  def & (m: AggregatedTimeSample) = accumulate(m)
 
 
-  private def combinedAvg(m: Aggregation): Double =
+  private def combinedAvg(m: AggregatedTimeSample): Double =
     if (m.count + count > 0) ((m.avg * m.count) + (avg * count)) / (m.count + count)
     else 0
 }
 
-object Aggregation {
-  def apply(series: String, time: Duration): Aggregation = Aggregation(series, time.toMillis, time.toMillis, time.toMillis, 1)
-  def apply(series: String, time: Long): Aggregation = Aggregation(series, time, time, time, 1)
-  def apply(sample: TimeSample): Aggregation = Aggregation(sample.series, sample.time, sample.time, sample.time, 1)
-  def apply(series: String): Aggregation = Aggregation(series, 0, 0, 0, 0)
+object AggregatedTimeSample {
+  def apply(series: String, time: Duration): AggregatedTimeSample = AggregatedTimeSample(series, time.toMillis, time.toMillis, time.toMillis, 1)
+  def apply(series: String, time: Long): AggregatedTimeSample = AggregatedTimeSample(series, time, time, time, 1)
+  def apply(sample: TimeSample): AggregatedTimeSample = AggregatedTimeSample(sample.series, sample.elapsed, sample.elapsed, sample.elapsed, 1)
+  def apply(series: String): AggregatedTimeSample = AggregatedTimeSample(series, 0, 0, 0, 0)
 }
 

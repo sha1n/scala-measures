@@ -51,6 +51,17 @@ class TimeSampleSinkTest extends SpecificationWithJUnit {
     }
   }
 
+  "TimeSampleSink" should {
+    "fail when null series name is provided" in {
+      new TimeSampleSink(null) must throwA[IllegalArgumentException]
+    }
+
+    "fail when negative capacity is provided series name is provided" in {
+      new TimeSampleSink("", 0) must throwA[IllegalArgumentException]
+      new TimeSampleSink("", -1) must throwA[IllegalArgumentException]
+    }
+  }
+
   trait Context extends Scope {
     val MeasName = "Test"
     val sink = new TimeSampleSink(MeasName, 6)

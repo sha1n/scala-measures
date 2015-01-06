@@ -11,6 +11,10 @@ class AsyncReporter(report: ReportSample, queueCapacity: Int, reporters: Int)(im
 
   def this(report: ReportSample)(implicit ec: ExecutionContext) = this(report, 100, 1)(ec)
 
+  require(report != null, "report function must not be null")
+  require(queueCapacity > 0, "queueCapacity must be positive")
+  require(reporters > 0, "reporters must be positive")
+
   @volatile private[this] var halt = false
   private[this] val queue = new PriorityBlockingQueue[TimeSample](queueCapacity, TimeSampleOrderComparator)
 

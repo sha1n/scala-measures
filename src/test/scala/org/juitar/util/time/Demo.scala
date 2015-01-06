@@ -48,7 +48,7 @@ object Demo extends App {
       case _ => Console.RED + Console.BOLD
     }
 
-    println(color + s"Got sample '${s.series}' with time value of ${s.time}" + Console.RESET)
+    println(color + s"Got sample '${s.series}' with time value of ${s.elapsed}" + Console.RESET)
   }
 
   def summary() = {

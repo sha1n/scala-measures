@@ -4,14 +4,16 @@ import scala.util.{Success, Try}
 
 class TimeSampleSink(series: String, capacity: Int = 10) extends Sink[TimeSample](capacity, TimeSampleSink.validate(series)) {
 
+  require(series != null, "series cannot be null")
+
   implicit val timeOrder = SampleOrdering
 
-  @volatile private[this] var aggregate = Aggregation(series)
+  @volatile private[this] var aggregate = AggregatedTimeSample(series)
 
   final override def add(item: TimeSample): Try[TimeSample] = {
     super.add(item) match {
       case s@Success(value) =>
-        aggregate = aggregate & Aggregation(value)
+        aggregate = aggregate & AggregatedTimeSample(value)
         s
       case f => f
     }
@@ -22,7 +24,7 @@ class TimeSampleSink(series: String, capacity: Int = 10) extends Sink[TimeSample
   def aggr = aggregate
   def median: Double = {
     val freeze = lastN
-    val sorted = freeze.map(s => s.time).sorted
+    val sorted = freeze.map(s => s.elapsed).sorted
     val n = sorted.length
 
     if (n % 2 == 0) (sorted((n / 2) - 1) + sorted(((n / 2) + 1) - 1)) / 2.0
@@ -37,8 +39,5 @@ object TimeSampleSink {
 }
 
 object SampleOrdering extends Ordering[TimeSample] {
-  override def compare(x: TimeSample, y: TimeSample): Int = -x.time.compareTo(y.time)
+  override def compare(x: TimeSample, y: TimeSample): Int = -x.elapsed.compareTo(y.elapsed)
 }
-
-class IncompatibleSeriesException(reportedSeries: String, currentSeries: String)
-  extends RuntimeException(s"'$reportedSeries' cannot be added to series '$currentSeries'")

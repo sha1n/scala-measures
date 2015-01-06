@@ -7,7 +7,9 @@ import scala.collection.JavaConversions._
 import scala.util.Try
 
 private [util] class Sink[T](capacity: Int, validate: (T) => T) {
-  
+
+  require(capacity > 0, "capacity must be positive")
+
   private final val data: util.Deque[T] = new ConcurrentLinkedDeque[T]()
 
   def add(item: T): Try[T] = {
