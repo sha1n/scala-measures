@@ -42,8 +42,8 @@ class AsyncReporter(report: ReportSample, queueCapacity: Int, reporters: Int)(im
   }
 }
 object AsyncReporter {
-  def apply(report: ReportSample, queueCapacity: Int, reporters: Int)(implicit ec: ExecutionContext): ReportSample =
-    new AsyncReporter(report, queueCapacity, reporters).report
+  def apply(report: ReportSample, queueCapacity: Int, reporterThreads: Int)(implicit ec: ExecutionContext): ReportSample =
+    new AsyncReporter(report, queueCapacity, reporterThreads).report
 
   def apply(report: ReportSample)(implicit ec: ExecutionContext): ReportSample =
     new AsyncReporter(report).report

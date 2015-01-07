@@ -1,18 +1,19 @@
 package org.juitar.util.time
 
 import org.juitar.util.time.TimeSampler._
-import scala.concurrent.ExecutionContext
-import scala.concurrent.duration._
 import org.specs2.mutable.SpecificationWithJUnit
 import org.specs2.specification.Scope
 import org.specs2.time.NoTimeConversions
+
+import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
 
 class AsyncReporterTest extends SpecificationWithJUnit with NoTimeConversions {
 
   private[this] implicit val executionContext = ExecutionContext.global
 
   "report" should {
-    "report samples in order of timestamp values" in new Context {
+    "report samples" in new Context {
 
       val s1 = TimeSample(Series1, 1)
       val s2 = TimeSample(Series2, 2)
@@ -27,7 +28,7 @@ class AsyncReporterTest extends SpecificationWithJUnit with NoTimeConversions {
       }
     }
 
-    "fail after shutdown" in new Context {
+    "fail to report after shutdown" in new Context {
       asyncReporter.shutdown()
       asyncReporter.report(TimeSample(Series1, 1)) must throwA[IllegalStateException]
     }
@@ -37,12 +38,12 @@ class AsyncReporterTest extends SpecificationWithJUnit with NoTimeConversions {
     val Series1 = "S1"
     val Series2 = "S2"
     var reported: Seq[TimeSample] = Seq()
-    implicit val reporter: ReportSample = s => {
+    implicit val report: ReportSample = s => {
       this.synchronized {
         reported = reported :+ s
       }
     }
-    val asyncReporter = new AsyncReporter(reporter)
+    val asyncReporter = new AsyncReporter(report)
 
   }
 }

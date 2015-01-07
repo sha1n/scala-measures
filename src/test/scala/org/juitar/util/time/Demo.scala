@@ -22,7 +22,9 @@ object Demo extends App {
   val SeriesName = "My Action Series"
   val timeSampleSink = new TimeSampleSink(SeriesName, 10)
 
-  implicit val reporter: ReportSample = AsyncReporter(demoReporter)
+  // Composing a buffered reporter with an async reporter using a single reporting thread
+  implicit val bufferedReporter: ReportSample =
+    BufferedReporter(bufferSize = 5)(AsyncReporter(report = demoReporter, queueCapacity = 10, reporterThreads = 1))
 
 
   runDemo()
