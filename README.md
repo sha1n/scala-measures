@@ -2,7 +2,7 @@ scala-time
 ==========
 Small experiment with execution time measurement design in Scala.
 
-If it interests you, you may take a look at the demo app for usage example. 
+If it interests you, you may want to take a look at the Demo app for a full usage example . 
 
 Here is a quick example of the core features:
 
