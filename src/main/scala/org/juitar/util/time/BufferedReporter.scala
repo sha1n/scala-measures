@@ -1,5 +1,6 @@
 package org.juitar.util.time
 
+import java.util
 import java.util.concurrent.ConcurrentLinkedQueue
 
 import org.juitar.util.time.TimeSampler._
@@ -8,7 +9,7 @@ import scala.collection.JavaConversions._
 
 class BufferedReporter(report: ReportSample, bufferSize: Int) {
 
-  private[this] val buffer = new ConcurrentLinkedQueue[TimeSample]
+  private[this] val buffer: util.Queue[TimeSample] = new ConcurrentLinkedQueue[TimeSample]
 
   def report(timeSample: TimeSample): Unit = {
     buffer.add(timeSample)
@@ -20,7 +21,7 @@ class BufferedReporter(report: ReportSample, bufferSize: Int) {
     val samples = buffer.toSeq
     
     samples.foreach {
-      s => report.apply(s)
+      s => if (s != null) report.apply(s)
     }
     
     buffer.removeAll(samples)

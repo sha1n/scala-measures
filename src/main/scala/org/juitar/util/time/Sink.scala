@@ -26,13 +26,18 @@ private [util] class Sink[T](capacity: Int, validate: (T) => T) {
 
   final def ++ (item: T): Try[T] = add(item)
 
-  final def lastN: Seq[T] = data.toSeq
+  final def lastN: Seq[T] = nullFreeData()
 
   final def topN(n: Int)(implicit order: Ordering[T]): Seq[T] = {
     require(n <= capacity, "'n' must be less or equal to 'capacity'")
 
-    val seq: Seq[T] = data.toList
+    val seq: Seq[T] = nullFreeData()
     seq.sorted.slice(0, n)
   }
+
+  protected def nullFreeData(additionalFilter: (T) => Boolean = (T) => true): Seq[T] =
+    data.filter {
+      e => e != null && additionalFilter(e) // concurrent java collections iterators might return nulls
+    }.toSeq
 
 }

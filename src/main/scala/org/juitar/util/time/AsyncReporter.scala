@@ -22,7 +22,7 @@ class AsyncReporter(report: ReportSample, queueCapacity: Int, reporters: Int)(im
     ec.execute(new Runnable {
       override def run(): Unit = {
         while (!halt) {
-          val ts = queue.poll(10, TimeUnit.MILLISECONDS)
+          val ts = queue.poll(1, TimeUnit.SECONDS)
           if (ts != null)
             report.apply(ts)
         }
