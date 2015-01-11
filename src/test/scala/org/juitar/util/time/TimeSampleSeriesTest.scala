@@ -2,8 +2,40 @@ package org.juitar.util.time
 
 import org.specs2.mutable.SpecificationWithJUnit
 import org.specs2.specification.Scope
+import org.specs2.time.NoTimeConversions
 
-class TimeSampleSinkTest extends SpecificationWithJUnit {
+import scala.concurrent.duration._
+
+class FramedTimeSampleSinkTest extends TimeSampleSeriesTest {
+  override val sink: TimeSampleSeries = new FramedTimeSampleSink(MeasName, 100.millis)
+
+  "FramedTimeSampleSinkTest" should {
+    "reset after the specified interval" in new Context {
+      sink ++ TimeSample(MeasName, 4)
+      sink ++ TimeSample(MeasName, 1)
+      sink ++ TimeSample(MeasName, 7)
+      sink ++ TimeSample(MeasName, 2)
+      sink ++ TimeSample(MeasName, 5)
+
+      Thread sleep 1.second.toMillis
+
+      sink ++ TimeSample(MeasName, 100)
+
+      sink.lastN must haveSize(1)
+      sink.median === 100
+      sink.aggr === AggregatedTimeSample(MeasName, 100, 100, 100, 1)
+    }
+  }
+}
+class TimeSampleSinkTest extends TimeSampleSeriesTest {
+  override val sink: TimeSampleSeries = new TimeSampleSink(MeasName, 100)
+}
+abstract class TimeSampleSeriesTest extends SpecificationWithJUnit with NoTimeConversions {
+
+  isolated
+
+  val MeasName = "Test"
+  val sink: TimeSampleSeries
 
   "percentile" should {
     "validate input range" in new Context {
@@ -39,8 +71,6 @@ class TimeSampleSinkTest extends SpecificationWithJUnit {
 
   "percentile90" should {
     "return the median value of the current history" in new Context {
-
-      override val sink = new TimeSampleSink(MeasName, 100)
 
       for (i <- 1 to 100) sink ++ TimeSample(MeasName, i)
 
@@ -89,12 +119,12 @@ class TimeSampleSinkTest extends SpecificationWithJUnit {
       sink ++ TimeSample(MeasName, 2)
       sink ++ TimeSample(MeasName, 1)
 
-      sink.history must haveSize(3)
+      sink.lastN must haveSize(3)
 
       sink.reset()
 
-      sink.history must haveSize(0)
-      sink.aggr === AggregatedTimeSample(MeasName, 0, 0, 0, 0)
+      sink.lastN must haveSize(0)
+      sink.aggr === AggregatedTimeSample(MeasName)
     }
   }
 
@@ -109,9 +139,6 @@ class TimeSampleSinkTest extends SpecificationWithJUnit {
     }
   }
 
-  trait Context extends Scope {
-    val MeasName = "Test"
-    val sink = new TimeSampleSink(MeasName, 10)
-  }
+  trait Context extends Scope
 
 }

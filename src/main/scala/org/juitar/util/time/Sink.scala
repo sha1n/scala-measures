@@ -24,8 +24,6 @@ private [util] class Sink[T](capacity: Int, validate: (T) => T) {
 
   }
 
-  final def ++ (item: T): Try[T] = add(item)
-
   def reset(): Unit = data.clear()
 
   final def lastN: Seq[T] = nullFreeData()

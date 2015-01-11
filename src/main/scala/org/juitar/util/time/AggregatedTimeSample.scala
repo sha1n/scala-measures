@@ -44,9 +44,10 @@ case class AggregatedTimeSample(series: String, avg: Double, min: Long, max: Lon
 }
 
 object AggregatedTimeSample {
+  final def zero(series: String) = AggregatedTimeSample(series, 0, 0, 0, 0)
   def apply(series: String, time: Duration): AggregatedTimeSample = AggregatedTimeSample(series, time.toMillis, time.toMillis, time.toMillis, 1)
   def apply(series: String, time: Long): AggregatedTimeSample = AggregatedTimeSample(series, time, time, time, 1)
   def apply(sample: TimeSample): AggregatedTimeSample = AggregatedTimeSample(sample.series, sample.elapsed, sample.elapsed, sample.elapsed, 1)
-  def apply(series: String): AggregatedTimeSample = AggregatedTimeSample(series, 0, 0, 0, 0)
+  def apply(series: String): AggregatedTimeSample = zero(series)
 }
 
