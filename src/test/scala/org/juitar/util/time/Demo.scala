@@ -5,6 +5,7 @@ import java.util.concurrent.{Executors, ThreadFactory}
 import org.juitar.util.time.TimeSampler._
 
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
 
 object Demo extends App {
 
@@ -20,7 +21,7 @@ object Demo extends App {
   private[this] implicit val executionContext = ExecutionContext.fromExecutor(executor)
 
   val SeriesName = "My Action Series"
-  val timeSampleSink = new TimeSampleSink(SeriesName, 10)
+  val framedTimeSampleSink = new FramedTimeSampleSink(SeriesName, 1.second)
 
   // Composing a buffered reporter with an async reporter using a single reporting thread
   implicit val bufferedReporter: ReportSample =
@@ -42,7 +43,7 @@ object Demo extends App {
   def action(sleep: Long) = Thread sleep sleep
 
   def demoReporter(s: TimeSample): Unit = {
-    timeSampleSink ++ s
+    framedTimeSampleSink ++ s
 
     val color = s match {
       case ts@TimeSample(_, _, t) if t < 30 => Console.GREEN + Console.BOLD
@@ -57,10 +58,10 @@ object Demo extends App {
 
     println()
     infoTitle("Top 3 Measurements:")
-    info(timeSampleSink.top(3).map(m => m.duration).mkString("\r\n"))
+    info(framedTimeSampleSink.top(3).map(m => m.duration).mkString("\r\n"))
 
     println()
-    val aggr = timeSampleSink.aggr
+    val aggr = framedTimeSampleSink.aggr
     infoTitle(s"Summary of '${aggr.series}':")
     info(
       s"""
