@@ -1,5 +1,7 @@
 package org.juitar.util.time
 
+import java.lang.Math._
+
 import scala.util.{Success, Try}
 
 class TimeSampleSink(series: String, capacity: Int = 10) extends Sink[TimeSample](capacity, TimeSampleSink.validate(series)) {
@@ -22,13 +24,26 @@ class TimeSampleSink(series: String, capacity: Int = 10) extends Sink[TimeSample
   def top(n: Int) = topN(n)
   def history = lastN
   def aggr = aggregate
-  def median: Double = {
+  def median: Long = percentile(0.5)
+  def percentile90: Long = percentile(0.9)
+  def percentile95: Long = percentile(0.95)
+  def percentile99: Long = percentile(0.99)
+
+  def  percentile(quantile: Double): Long = {
+    require(quantile >= 0.0 && quantile <= 1.0, s"'$quantile' is out of range. Expected a number between 0.0 and 1.0")
+
     val freeze = lastN
+
+    if (freeze.length == 0)  return 0
+
+
     val sorted = freeze.map(s => s.elapsed).sorted
     val n = sorted.length
 
-    if (n % 2 == 0) (sorted((n / 2) - 1) + sorted(((n / 2) + 1) - 1)) / 2.0
-    else sorted(((n + 1) / 2) - 1)
+    val pos = quantile * n
+    if (pos >= sorted.length) return sorted(n - 1)
+
+    sorted(pos.toInt)
   }
 
 }

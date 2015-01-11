@@ -5,8 +5,52 @@ import org.specs2.specification.Scope
 
 class TimeSampleSinkTest extends SpecificationWithJUnit {
 
-  "median" should {
+  "percentile" should {
+    "validate input range" in new Context {
+      sink.percentile(-1) must throwA[IllegalArgumentException]
+      sink.percentile(2) must throwA[IllegalArgumentException]
 
+    }
+    "work when no sample has is present" in new Context {
+      sink.percentile(0.5) === 0.0
+    }
+    "return the correct percentile value in range" in new Context {
+      sink ++ TimeSample(MeasName, 90)
+      sink ++ TimeSample(MeasName, 10)
+      sink ++ TimeSample(MeasName, 30)
+      sink ++ TimeSample(MeasName, 40)
+      sink ++ TimeSample(MeasName, 50)
+      sink ++ TimeSample(MeasName, 20)
+      sink ++ TimeSample(MeasName, 50)
+      sink ++ TimeSample(MeasName, 70)
+      sink ++ TimeSample(MeasName, 80)
+      sink ++ TimeSample(MeasName, 90)
+
+      sink.percentile(0.1) === 20
+      sink.percentile(0.15) === 20
+      sink.percentile(0.5) === 50
+      sink.percentile(0.65) === 70
+      sink.percentile(0.75) === 80
+      sink.percentile(0.9) === 90
+      sink.percentile(0.95) === 90
+      sink.percentile(1) === 90
+    }
+  }
+
+  "percentile90" should {
+    "return the median value of the current history" in new Context {
+
+      override val sink = new TimeSampleSink(MeasName, 100)
+
+      for (i <- 1 to 100) sink ++ TimeSample(MeasName, i)
+
+      sink.percentile(0.99) === 100
+      sink.percentile(0.9) === 91
+      sink.percentile(0.95) === 96
+    }
+  }
+
+  "median" should {
     "return the median value of the current history" in new Context {
       sink ++ TimeSample(MeasName, 4)
       sink ++ TimeSample(MeasName, 1)
@@ -14,19 +58,7 @@ class TimeSampleSinkTest extends SpecificationWithJUnit {
       sink ++ TimeSample(MeasName, 2)
       sink ++ TimeSample(MeasName, 5)
 
-      println(sink.history.mkString(", "))
       sink.median === 4
-    }
-
-    "return the median value of the current history with even number" in new Context {
-      sink ++ TimeSample(MeasName, 4)
-      sink ++ TimeSample(MeasName, 1)
-      sink ++ TimeSample(MeasName, 7)
-      sink ++ TimeSample(MeasName, 2)
-      sink ++ TimeSample(MeasName, 5)
-      sink ++ TimeSample(MeasName, 8)
-
-      sink.median === 4.5
     }
   }
 
@@ -64,7 +96,7 @@ class TimeSampleSinkTest extends SpecificationWithJUnit {
 
   trait Context extends Scope {
     val MeasName = "Test"
-    val sink = new TimeSampleSink(MeasName, 6)
+    val sink = new TimeSampleSink(MeasName, 10)
   }
 
 }
