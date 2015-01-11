@@ -83,6 +83,21 @@ class TimeSampleSinkTest extends SpecificationWithJUnit {
     }
   }
 
+  "reset" should {
+    "clear sample history and aggregated data" in new Context {
+      sink ++ TimeSample(MeasName, 3)
+      sink ++ TimeSample(MeasName, 2)
+      sink ++ TimeSample(MeasName, 1)
+
+      sink.history must haveSize(3)
+
+      sink.reset()
+
+      sink.history must haveSize(0)
+      sink.aggr === AggregatedTimeSample(MeasName, 0, 0, 0, 0)
+    }
+  }
+
   "TimeSampleSink" should {
     "fail when null series name is provided" in {
       new TimeSampleSink(null) must throwA[IllegalArgumentException]

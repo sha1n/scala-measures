@@ -1,7 +1,5 @@
 package org.juitar.util.time
 
-import java.lang.Math._
-
 import scala.util.{Success, Try}
 
 class TimeSampleSink(series: String, capacity: Int = 10) extends Sink[TimeSample](capacity, TimeSampleSink.validate(series)) {
@@ -12,13 +10,18 @@ class TimeSampleSink(series: String, capacity: Int = 10) extends Sink[TimeSample
 
   @volatile private[this] var aggregate = AggregatedTimeSample(series)
 
-  final override def add(item: TimeSample): Try[TimeSample] = {
+  override def add(item: TimeSample): Try[TimeSample] = {
     super.add(item) match {
       case s@Success(value) =>
         aggregate = aggregate & AggregatedTimeSample(value)
         s
       case f => f
     }
+  }
+
+  override def reset() = {
+    super.reset()
+    aggregate = AggregatedTimeSample(series, 0, 0, 0, 0)
   }
 
   def top(n: Int) = topN(n)
