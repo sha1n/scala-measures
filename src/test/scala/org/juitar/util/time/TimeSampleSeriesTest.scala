@@ -7,7 +7,7 @@ import org.specs2.time.NoTimeConversions
 import scala.concurrent.duration._
 
 class FramedTimeSampleSinkTest extends TimeSampleSeriesTest {
-  override val sink: TimeSampleSeries = new FramedTimeSampleSink(MeasName, 100.millis)
+  override val sink: TimeSampleSeries = new FramedTimeSampleSink(MeasName, 1.second)
 
   "FramedTimeSampleSinkTest" should {
     "reset after the specified interval" in new Context {
@@ -17,7 +17,7 @@ class FramedTimeSampleSinkTest extends TimeSampleSeriesTest {
       sink ++ TimeSample(MeasName, 2)
       sink ++ TimeSample(MeasName, 5)
 
-      Thread sleep 1.second.toMillis
+      Thread sleep 3.second.toMillis
 
       sink ++ TimeSample(MeasName, 100)
 
