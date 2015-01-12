@@ -16,7 +16,6 @@ class StopWatchTest extends SpecificationWithJUnit with NoTimeConversions {
       val split = time()
 
       split must beGreaterThanOrEqualTo(10L)
-      split must beLessThan(20L)
 
       Thread sleep 100
 
