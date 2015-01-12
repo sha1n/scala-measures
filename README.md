@@ -1,8 +1,8 @@
 scala-time
 ==========
-Small experiment with execution time measurement design in Scala.
+This is a small library which provide execution time measurement and reporting design in Scala.
 
-If it interests you, you may want to take a look at the Demo app for a full usage example . 
+Check out the Demo console app for a full usage example .
 
 Here is a quick example of the core features:
 
