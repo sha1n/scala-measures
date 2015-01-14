@@ -12,6 +12,7 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:exper
 
 libraryDependencies ++= Seq(
 "org.slf4j" % "slf4j-api" % "1.7.5",
+"com.newrelic.agent.java" % "newrelic-api" % "2.14.1",
 "org.specs2" %% "specs2" % "2.3.12" % "test",
 "org.slf4j" % "slf4j-simple" % "1.7.5" % "test"
 )

@@ -6,6 +6,7 @@ import org.juitar.util.time.TimeSampler._
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 
 object Demo extends App {
 
@@ -43,7 +44,10 @@ object Demo extends App {
   def action(sleep: Long) = Thread sleep sleep
 
   def demoReporter(s: TimeSample): Unit = {
-    framedTimeSampleSink ++ s
+    framedTimeSampleSink ++ s match {
+      case Failure(t) => error(s"Failed to report sample. Message: ${t.getMessage}")
+      case Success(_) =>
+    }
 
     val color = s match {
       case ts@TimeSample(_, _, t) if t < 30 => Console.GREEN + Console.BOLD
@@ -78,7 +82,9 @@ object Demo extends App {
     info("".padTo(title.length, "-").mkString)
   }
 
-  def info(msg: String) = println(Console.WHITE + Console.BOLD + msg + Console.RESET)
+  def info(msg: String) = colorMsg(Console.WHITE)(msg)
+  def error(msg: String) = colorMsg(Console.RED)(msg)
+  def colorMsg(color: String)(msg: String) = println(color + Console.BOLD + msg + Console.RESET)
 
   def logo() = println(Console.WHITE + Console.BOLD +
     """

@@ -8,3 +8,6 @@ release.properties
 
 # IntelliJ
 .idea
+
+# NewRelic
+newrelic*
