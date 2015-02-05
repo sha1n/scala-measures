@@ -1,6 +1,5 @@
 package org.juitar.util.time
 
-import com.newrelic.api.agent.{NewRelic, Trace}
 import org.slf4j.LoggerFactory
 
 import scala.util.control.Exception._
@@ -11,7 +10,7 @@ object TimeSampler {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  @Trace(dispatcher = true) def withTimeSample[T <: Any](series: String, action: => T)(implicit report: ReportSample): T = {
+  def withTimeSample[T <: Any](series: String, action: => T)(implicit report: ReportSample): T = {
     val stop = StopWatch.start()
     val result = action
     val elapsed = stop()
@@ -20,11 +19,6 @@ object TimeSampler {
       val timeSample = TimeSample(series, elapsed)
 
       report(timeSample)
-
-      val metricName = s"/${timeSample.series}"
-      NewRelic.setTransactionName(null , metricName)
-      NewRelic.recordMetric(s"$metricName/time", timeSample.elapsed)
-      NewRelic.incrementCounter(s"$metricName/count")
     }
 
     result
