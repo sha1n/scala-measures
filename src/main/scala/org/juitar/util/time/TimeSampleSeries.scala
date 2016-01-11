@@ -16,7 +16,7 @@ trait TimeSampleSeries {
 
     val freeze = lastN
 
-    if (freeze.length == 0)  return 0
+    if (freeze.isEmpty)  return 0
 
 
     val sorted = freeze.map(s => s.elapsed).sorted

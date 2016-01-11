@@ -6,8 +6,8 @@ name := "scala-time"
 licenses := Seq("Apache 2.0" -> url("http://www.opensource.org/licenses/Apache-2.0"))
 homepage := Some(url("https://github.com/sha1n/scala-time"))
 
-scalaVersion := "2.11.2"
-crossScalaVersions := Seq("2.10.4", "2.11.2")
+scalaVersion := "2.11.7"
+crossScalaVersions := Seq("2.10.4", "2.11.7")
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:experimental.macros")
 
 libraryDependencies ++= Seq(

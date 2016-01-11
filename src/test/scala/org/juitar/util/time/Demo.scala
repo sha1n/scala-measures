@@ -6,6 +6,7 @@ import org.juitar.util.time.TimeSampler._
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
+import scala.util.Random
 import scala.util.{Failure, Success}
 
 object Demo extends App {
@@ -21,11 +22,11 @@ object Demo extends App {
   })
   private[this] implicit val executionContext = ExecutionContext.fromExecutor(executor)
 
-  val SeriesName = "My Action Series"
-  val framedTimeSampleSink = new FramedTimeSampleSink(SeriesName, 1.second)
+  final val SeriesName = "My Action Series"
+  final val FramedTimeSampleSink = new FramedTimeSampleSink(SeriesName, 1.second)
 
   // Composing a buffered reporter with an async reporter using a single reporting thread
-  implicit val bufferedReporter: ReportSample =
+  implicit final val Reporter: ReportSample =
     BufferedReporter(bufferSize = 5)(AsyncReporter(report = demoReporter, queueCapacity = 10, reporterThreads = 1))
 
 
@@ -34,7 +35,8 @@ object Demo extends App {
   // <-- End
 
   def runDemo() = {
-    for (i <- 1 to 10) action(i * 10) withTimeSampleAs SeriesName
+    val rand = new Random()
+    for (i <- 1 to 100) action((i * rand.nextDouble()).toLong) withTimeSampleAs SeriesName
 
     Thread sleep 1000 // Allow the reporter queue to be consumed for the sake of this demo
 
@@ -44,7 +46,7 @@ object Demo extends App {
   def action(sleep: Long) = Thread sleep sleep
 
   def demoReporter(s: TimeSample): Unit = {
-    framedTimeSampleSink ++ s match {
+    FramedTimeSampleSink ++ s match {
       case Failure(t) => error(s"Failed to report sample. Message: ${t.getMessage}")
       case Success(_) =>
     }
@@ -55,17 +57,24 @@ object Demo extends App {
       case _ => Console.RED + Console.BOLD
     }
 
-    println(color + s"Got sample '${s.series}' with time value of ${s.elapsed}" + Console.RESET)
+    println(color + s"Got sample '${s.series}' with time value of ${s.duration}" + Console.RESET)
   }
 
   def summary() = {
 
     println()
     infoTitle("Top 3 Measurements:")
-    info(framedTimeSampleSink.top(3).map(m => m.duration).mkString("\r\n"))
+    info(FramedTimeSampleSink.top(3).map(m => m.duration).mkString("\r\n"))
 
     println()
-    val aggr = framedTimeSampleSink.aggr
+    infoTitle("Percentiles:")
+    info(s"99% - ${FramedTimeSampleSink.percentile99.millis}")
+    info(s"95% - ${FramedTimeSampleSink.percentile95.millis}")
+    info(s"90% - ${FramedTimeSampleSink.percentile90.millis}")
+    info(s"50% - ${FramedTimeSampleSink.median.millis}")
+
+    println()
+    val aggr = FramedTimeSampleSink.aggr
     infoTitle(s"Summary of '${aggr.series}':")
     info(
       s"""
