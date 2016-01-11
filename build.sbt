@@ -1,5 +1,8 @@
 import sbt.Keys._
 import sbt._
+import sbtrelease.ReleasePlugin.ReleaseKeys._
+import sbtrelease.ReleaseStateTransformations._
+import sbtrelease._
 
 organization := "org.juitar"
 name := "scala-time"
@@ -11,26 +14,28 @@ crossScalaVersions := Seq("2.10.4", "2.11.7")
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:experimental.macros")
 
 libraryDependencies ++= Seq(
-"org.slf4j" % "slf4j-api" % "1.7.5",
-"org.specs2" %% "specs2" % "2.3.12" % "test",
-"org.slf4j" % "slf4j-simple" % "1.7.5" % "test"
+  "org.slf4j" % "slf4j-api" % "1.7.5",
+  "org.specs2" %% "specs2" % "2.3.12" % "test",
+  "org.slf4j" % "slf4j-simple" % "1.7.5" % "test"
 )
+
+// --> publishing
 
 publishMavenStyle := true
 publishArtifact in Test := false
-pomIncludeRepository := { _ => false}
+pomIncludeRepository := { _ => false }
 pomExtra :=
   <scm>
     <url>git@github.com:sha1n/scala-time.git</url>
     <connection>scm:git:git@github.com:sha1n/scala-time.git</connection>
   </scm>
-  <developers>
-    <developer>
-      <id>sha1n</id>
-      <name>Shai Nagar</name>
-      <url>https://github.com/sha1n</url>
-    </developer>
-  </developers>
+    <developers>
+      <developer>
+        <id>sha1n</id>
+        <name>Shai Nagar</name>
+        <url>https://github.com/sha1n</url>
+      </developer>
+    </developers>
 
 
 publishTo := {
@@ -38,5 +43,26 @@ publishTo := {
   if (isSnapshot.value)
     Some("snapshots" at nexus + "content/repositories/snapshots")
   else
-    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+    Some("releases" at nexus + "service/local/staging/deploy/maven2")
 }
+
+lazy val publishAction = {
+  state: State =>
+    val extracted = Project.extract(state)
+    val ref = extracted.get(thisProjectRef)
+    extracted.runAggregated(com.typesafe.sbt.pgp.PgpKeys.publishSigned in Global in ref, state)
+}
+
+releaseSettings
+releaseProcess := Seq[ReleaseStep](
+    checkSnapshotDependencies,
+    runTest,
+    inquireVersions,
+    setReleaseVersion,
+    commitReleaseVersion,
+    tagRelease,
+    publishArtifacts.copy(action = publishAction),
+    setNextVersion,
+    commitNextVersion,
+    pushChanges
+)
