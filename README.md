@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/sha1n/scala-time.svg?branch=master)](https://travis-ci.org/sha1n/scala-time)
+
 scala-time
 ==========
 This is a small library which provide execution time measurement and reporting design in Scala.
