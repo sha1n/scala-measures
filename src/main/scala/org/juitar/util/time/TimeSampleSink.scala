@@ -8,7 +8,7 @@ class TimeSampleSink(series: String, capacity: Int = 10)
 
   require(series != null, "series cannot be null")
 
-  implicit val timeOrder = SampleOrdering
+  private implicit val timeOrder: SampleOrdering.type = SampleOrdering
 
   @volatile private[this] var aggregate = AggregatedTimeSample(series)
 
@@ -26,9 +26,9 @@ class TimeSampleSink(series: String, capacity: Int = 10)
     aggregate = AggregatedTimeSample(series, 0, 0, 0, 0)
   }
 
-  override def top(n: Int) = topN(n)
-  def history = lastN
-  override def aggr = aggregate
+  override def top(n: Int): Seq[TimeSample] = topN(n)
+  def history: Seq[TimeSample] = lastN
+  override def aggr: AggregatedTimeSample = aggregate
 
 }
 object TimeSampleSink {

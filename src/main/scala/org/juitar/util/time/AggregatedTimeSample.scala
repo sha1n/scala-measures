@@ -35,7 +35,7 @@ case class AggregatedTimeSample(series: String, avg: Double, min: Long, max: Lon
     )
   }
 
-  def & (m: AggregatedTimeSample) = accumulate(m)
+  def & (m: AggregatedTimeSample): AggregatedTimeSample = accumulate(m)
 
 
   private def combinedAvg(m: AggregatedTimeSample): Double =

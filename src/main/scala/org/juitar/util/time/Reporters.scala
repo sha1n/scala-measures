@@ -6,7 +6,7 @@ object Reporters {
 
   private final val DefaultLogger = LoggerFactory.getLogger(TimeSample.getClass)
 
-  type TimeSampleFormatter = (TimeSample) => String
+  type TimeSampleFormatter = TimeSample => String
   def defaultLogFormatter(timeSample: TimeSample): String = timeSample.toString
 
   def reportLog(timeSample: TimeSample)

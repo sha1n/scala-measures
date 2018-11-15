@@ -18,14 +18,12 @@ class AsyncReporter(report: ReportSample, queueCapacity: Int, reporters: Int)(im
   @volatile private[this] var halt = false
   private[this] val queue = new PriorityBlockingQueue[TimeSample](queueCapacity, TimeSampleOrderComparator)
 
-  for (i <- 1 to reporters) {
-    ec.execute(new Runnable {
-      override def run(): Unit = {
-        while (!halt) {
-          val ts = queue.poll(1, TimeUnit.SECONDS)
-          if (ts != null)
-            report.apply(ts)
-        }
+  for (_ <- 1 to reporters) {
+    ec.execute(() => {
+      while (!halt) {
+        val ts = queue.poll(1, TimeUnit.SECONDS)
+        if (ts != null)
+          report.apply(ts)
       }
     })
   }
@@ -36,7 +34,7 @@ class AsyncReporter(report: ReportSample, queueCapacity: Int, reporters: Int)(im
     queue.add(timeSample)
   }
 
-  def shutdown() = {
+  def shutdown(): Unit = {
     halt = true
     queue.clear()
   }
