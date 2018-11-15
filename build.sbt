@@ -9,14 +9,16 @@ name := "scala-time"
 licenses := Seq("Apache 2.0" -> url("http://www.opensource.org/licenses/Apache-2.0"))
 homepage := Some(url("https://github.com/sha1n/scala-time"))
 
-scalaVersion := "2.11.7"
-crossScalaVersions := Seq("2.10.4", "2.11.7")
+scalaVersion := "2.12.4"
+crossScalaVersions := Seq("2.12.4")
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:experimental.macros")
 
 libraryDependencies ++= Seq(
-  "org.slf4j" % "slf4j-api" % "1.7.5",
-  "org.specs2" %% "specs2" % "2.3.12" % "test",
-  "org.slf4j" % "slf4j-simple" % "1.7.5" % "test"
+  "org.slf4j" % "slf4j-api" % "1.7.25",
+  "org.specs2" %% "specs2-core" % "4.3.4" % "test",
+  "org.specs2" %% "specs2-junit" % "4.3.4" % "test",
+  "org.specs2" %% "specs2-mock" % "4.3.4" % "test",
+  "org.slf4j" % "slf4j-simple" % "1.7.7" % "test"
 )
 
 // --> publishing

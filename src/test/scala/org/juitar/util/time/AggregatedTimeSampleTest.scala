@@ -3,10 +3,9 @@ package org.juitar.util.time
 import java.util.concurrent.TimeUnit
 
 import org.specs2.mutable.SpecificationWithJUnit
-import org.specs2.time.NoTimeConversions
 import scala.concurrent.duration._
 
-class AggregatedTimeSampleTest extends SpecificationWithJUnit with NoTimeConversions {
+class AggregatedTimeSampleTest extends SpecificationWithJUnit {
 
   "AggregatedTimeSample" should {
     "fail when null series is provided" in {

@@ -3,11 +3,10 @@ package org.juitar.util.time
 import org.juitar.util.time.TimeSampler._
 import org.specs2.mutable.SpecificationWithJUnit
 import org.specs2.specification.Scope
-import org.specs2.time.NoTimeConversions
 
 import scala.concurrent.ExecutionContext
 
-class BufferedReporterTest  extends SpecificationWithJUnit with NoTimeConversions {
+class BufferedReporterTest  extends SpecificationWithJUnit {
 
   private[this] implicit val executionContext = ExecutionContext.global
 

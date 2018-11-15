@@ -3,14 +3,13 @@ package org.juitar.util.time
 import org.juitar.util.time.TimeSampler._
 import org.specs2.mutable.SpecificationWithJUnit
 import org.specs2.specification.Scope
-import org.specs2.time.NoTimeConversions
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 import scala.concurrent.duration._
 
-class AsyncReporterTest extends SpecificationWithJUnit with NoTimeConversions {
+class AsyncReporterTest extends SpecificationWithJUnit {
 
-  private[this] implicit val executionContext = ExecutionContext.global
+  implicit val executionContext: ExecutionContextExecutor = ExecutionContext.global
 
   "report" should {
     "report samples" in new Context {
@@ -23,9 +22,7 @@ class AsyncReporterTest extends SpecificationWithJUnit with NoTimeConversions {
       asyncReporter.report(s2)
       asyncReporter.report(s3)
 
-      reported must eventually(20, 100.millis) {
-        contain(s1, s2, s3)
-      }
+      reported must contain(s1, s2, s3).eventually(20, 100.millis)
     }
 
     "fail to report after shutdown" in new Context {

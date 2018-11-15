@@ -3,10 +3,10 @@ package org.juitar.util.time
 import java.util
 import java.util.concurrent.ConcurrentLinkedDeque
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.util.Try
 
-private [util] class Sink[T](capacity: Int, validate: (T) => T) {
+private [util] class Sink[T](capacity: Int, validate: T => T) {
 
   require(capacity > 0, "capacity must be positive")
 
@@ -36,8 +36,8 @@ private [util] class Sink[T](capacity: Int, validate: (T) => T) {
   }
 
 
-  protected def nullFreeData(additionalFilter: (T) => Boolean = (T) => true): Seq[T] =
-    data.filter {
+  protected def nullFreeData(additionalFilter: T => Boolean = _ => true): Seq[T] =
+    data.asScala.filter {
       e => e != null && additionalFilter(e) // concurrent java collections iterators might return nulls
     }.toSeq
 

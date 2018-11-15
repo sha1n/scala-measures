@@ -2,7 +2,6 @@ package org.juitar.util.time
 
 import org.specs2.mutable.SpecificationWithJUnit
 import org.specs2.specification.Scope
-import org.specs2.time.NoTimeConversions
 
 import scala.concurrent.duration._
 
@@ -30,7 +29,7 @@ class FramedTimeSampleSinkTest extends TimeSampleSeriesTest {
 class TimeSampleSinkTest extends TimeSampleSeriesTest {
   override val sink: TimeSampleSeries = new TimeSampleSink(MeasName, 100)
 }
-abstract class TimeSampleSeriesTest extends SpecificationWithJUnit with NoTimeConversions {
+abstract class TimeSampleSeriesTest extends SpecificationWithJUnit {
 
   isolated
 

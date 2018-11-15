@@ -1,9 +1,8 @@
 package org.juitar.util.time
 
 import org.specs2.mutable.SpecificationWithJUnit
-import org.specs2.time.NoTimeConversions
 
-class StopWatchTest extends SpecificationWithJUnit with NoTimeConversions {
+class StopWatchTest extends SpecificationWithJUnit {
 
 
   "StopWatch" should {

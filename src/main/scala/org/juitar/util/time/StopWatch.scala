@@ -7,10 +7,10 @@ object StopWatch {
   def start(): StopWatch.Elapsed = {
     val startTime = System.currentTimeMillis()
 
-    split(startTime)
+    () => split(startTime)
   }
 
-  @inline private def split(startTime: Long)() = {
+  @inline private def split(startTime: Long) = {
     System.currentTimeMillis() - startTime
   }
 }

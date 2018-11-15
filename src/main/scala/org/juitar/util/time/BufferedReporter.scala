@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 import org.juitar.util.time.TimeSampler._
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 class BufferedReporter(report: ReportSample, bufferSize: Int) {
 
@@ -17,14 +17,14 @@ class BufferedReporter(report: ReportSample, bufferSize: Int) {
     if(buffer.size() >= bufferSize) flush()
   }
   
-  def flush() = {
-    val samples = buffer.toSeq
+  def flush(): Boolean = {
+    val samples = buffer.asScala.toSeq
     
     samples.foreach {
       s => if (s != null) report.apply(s)
     }
     
-    buffer.removeAll(samples)
+    buffer.removeAll(samples.asJava)
   }
   
   def clear(): Unit = {
