@@ -14,11 +14,11 @@ private [util] class Sink[T](capacity: Int, validate: T => T) {
 
   def add(item: T): Try[T] = {
     Try({
-      validate(item)
-
       data.addFirst(validate(item))
 
-      while (data.size() > capacity) data.removeLast()
+      while (data.size() > capacity)
+        data.removeLast()
+
       item
     })
 
