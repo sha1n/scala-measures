@@ -8,6 +8,7 @@ Check out the Demo console app for a full usage example .
 
 Here is a quick example of the core features:
 
+```scala
     // this method is called for each collected time 
     implicit val reporter: ReportSample = yourTimeReportingHandler 
     
@@ -16,13 +17,14 @@ Here is a quick example of the core features:
     
     // and here is how you hook your method 'yourAction' to the time sampler
     yourAction() withTimeSampleAs seriesName
-  
+```  
 
 There are also utility classes for buffered and async sample reporting, that can be composed to provide better performance. Here is how you use them:
 
+```scala
     // Composing a buffered reporter with an async reporter using a single reporting thread
     implicit val bufferedReporter: ReportSample =
         BufferedReporter(bufferSize = 5)
         (AsyncReporter(report = yourTimeReportingHandler, queueCapacity = 10, reporterThreads = 1))
-
+```
 Enjoy...
